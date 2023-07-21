@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-import sys
 
 
 class RubiksColor:
@@ -48,16 +47,19 @@ rubiks_colors = [
 ]
 
 
-def rotated_rect_to_contour(rotated_rect):
+def rectify_contour(contour):
     """
-    Convert a rotated rectangle to a contour
-    :param rotated_rect: Rotated rectangle
-    :return: Contour
+    Rectify a contour by finding the smallest rectangle that contains the contour
+    :param contour: Contour to rectify
+    :return: The rectified contour and its aspect ratio
     """
+    rotated_rect = cv2.minAreaRect(contour)
+    aspect_ratio = rotated_rect[1][0] / rotated_rect[1][1]
+
     box = cv2.boxPoints(rotated_rect)
     box = np.int0(box)
 
-    return box
+    return box, aspect_ratio
 
 
 def find_contours_with_color_range(image, min_color, max_color):
@@ -121,6 +123,12 @@ def find_square_contours(contours):
         if num_edges < 4 or num_edges > 6:
             continue
 
+        # Rectify the contour
+        # If final aspect ratio is not close to 1, it is not a square
+        contour, aspect_ratio = rectify_contour(contour)
+        if aspect_ratio < 0.8 or aspect_ratio > 1.2:
+            continue
+
         # We found a square!!
         square_contours.append(contour)
 
@@ -137,9 +145,7 @@ def number_found_squares(frame, found_squares):
     )
 
     # Convert found contour to a rectangle
-    rotated_rect = cv2.minAreaRect(side_contour)
-    side_rect_contour = rotated_rect_to_contour(rotated_rect)
-
+    side_rect_contour, _ = rectify_contour(side_contour)
     cv2.drawContours(frame, [side_rect_contour], 0, (0, 0, 255), 2)
 
     # Find the orientation (origin, clockwise next point, clockwise previous point) of the rectangle
@@ -177,15 +183,20 @@ def number_found_squares(frame, found_squares):
         x = cube_x * np.cos(theta)
         y = cube_x * np.sin(theta)
 
-        theta = np.arctan2(column_k_value, 1)
+        # theta = np.arctan2(column_k_value, 1)
 
-        x += cube_y * np.cos(theta)
-        y += cube_y * np.sin(theta)
+        # x += cube_y * np.cos(theta)
+        # y += cube_y * np.sin(theta)
 
         actual_x = origin_point[0] + x
-        actual_y = origin_point[1] + abs(y)
+        actual_y = origin_point[1] + y
 
-        cv2.circle(frame, (int(actual_x), int(actual_y)), 5, (0, 0, 0), 2)
+        actual_x2 = clockwise_previous_point[0] + x
+        actual_y2 = clockwise_previous_point[1] + y
+
+        cv2.line(frame, (int(actual_x), int(actual_y)), (int(actual_x2), int(actual_y2)), (0, 0, 0), 2)
+
+        # cv2.circle(frame, (int(actual_x), int(actual_y)), 5, (0, 0, 0), 2)
 
 
 def find_rubiks_side(frame):
