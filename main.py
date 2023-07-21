@@ -88,7 +88,7 @@ def rectify_contour(contour):
     aspect_ratio = rotated_rect[1][0] / rotated_rect[1][1]
 
     box = cv2.boxPoints(rotated_rect)
-    box = np.int0(box)
+    box = np.intp(box)
 
     return box, aspect_ratio
 
