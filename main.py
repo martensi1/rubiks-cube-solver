@@ -356,7 +356,7 @@ def main():
         process_frame(frame, trigger_pressed)
         trigger_pressed = False
 
-        cv2.imshow('frame', frame)
+        cv2.imshow("Rubik's Cube Solver", frame)
         key_pressed = cv2.waitKey(25) & 0xFF
 
         if key_pressed == ord(' '):
