@@ -5,9 +5,10 @@ The solving method is based on the Herbert Kociemba's two-phase algorithm for so
 
 ## Usage
 
-T.B.D
+1. Install required packages with `pip install -r requirements.txt`
+2. Run the script with `python main.py`
 
 
 ## Author
 
-Simon Mårtensson
+Simon Alm-Mårtensson
